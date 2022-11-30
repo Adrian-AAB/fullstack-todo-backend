@@ -123,3 +123,8 @@ export const updateDbItemById = (
     return "not found";
   }
 };
+
+export const deleteAllItems = () => {
+  db.length = 0;
+  return db;
+}

@@ -5,25 +5,25 @@
   </head>
   <body>
     <header>
-      <h1>My server API</h1>
+      <h1>My To-Do-List APP API</h1>
       <h2>RESTful JSON API</h2>
     </header>
     <main>
       <section>
-        <h3>Retrieve all items</h3>
-        <p><code>GET /items</code></p>
+        <h3>Retrieve all tasks</h3>
+        <p><code>GET /tasks</code></p>
       </section>
       <section>
-        <h3>Create a item</h3>
-        <p><code>POST /items</code></p>
+        <h3>Create a task</h3>
+        <p><code>POST /task</code></p>
       </section>
       <section>
-        <h3>Retrieve a specific item</h3>
-        <p><code>GET /items/{id}</code></p>
+        <h3>Retrieve a specific task</h3>
+        <p><code>GET /task/{id}</code></p>
       </section>
       <section>
-        <h3>Update a specific item</h3>
-        <p><code>PATCH /items/{id}</code></p>
+        <h3>Update a specific task</h3>
+        <p><code>PATCH /task/{id}</code></p>
         <p>Attaching a JSON body with the possible below fields:</p>
         <ul>
           <li><code>title</code> (string)</li>
@@ -32,7 +32,11 @@
       </section>
       <section>
         <h3>Delete a specific item</h3>
-        <p><code>DELETE /items/{id}</code></p>
+        <p><code>DELETE /task/{id}</code></p>
+      </section>
+      <section>
+        <h3>reset database to empty</h3>
+        <p><code>PATCH /tasks/reset</code></p>
       </section>
     </main>
   </body>
