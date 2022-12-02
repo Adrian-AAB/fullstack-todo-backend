@@ -97,7 +97,7 @@ app.patch<{ id: string }, {}, Partial<DbItem>>("/tasks/:id", (req, res) => {
 
 //get all completed tasks
 
-app.get("./tasks/completed", (req, res) => {
+app.get("/tasks/completed", (req, res) => {
   const allCompletedTasks = getAllCompleted();
   res.status(200).json(allCompletedTasks);
 });
