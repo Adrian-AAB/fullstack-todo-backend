@@ -140,7 +140,7 @@ export const addCompletedItem = (task: DbItemWithId) => {
   const newEntry: DbItemWithId = {
     ...task,
   };
-  db.push(newEntry);
+  completedTasks.push(newEntry);
   return newEntry;
 };
 
