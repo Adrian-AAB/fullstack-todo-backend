@@ -50,7 +50,7 @@ app.get("/tasks", (req, res) => {
 app.get("/completed", (req, res) => {
   const allCompletedTasks = getAllCompleted();
   res.status(200).json(allCompletedTasks);
-  console.log(allCompletedTasks)
+  console.log(allCompletedTasks);
 });
 
 // POST /tasks
