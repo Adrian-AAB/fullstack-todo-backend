@@ -13,7 +13,7 @@ import {
   addCompletedItem,
   DbItemWithId,
   deleteAllCompleted,
-  getAllCompleted
+  getAllCompleted,
 } from "./db";
 import filePath from "./filePath";
 
@@ -58,9 +58,9 @@ app.post<{}, {}, DbItem>("/tasks", (req, res) => {
 // PATCH Database to empty /tasks/reset
 app.delete("/tasks/reset", (req, res) => {
   deleteAllItems();
-  const allTasks = getAllDbItems()
-  res.status(200).json(allTasks)
-})
+  const allTasks = getAllDbItems();
+  res.status(200).json(allTasks);
+});
 
 // GET /tasks/:id
 app.get<{ id: string }>("/tasks/:id", (req, res) => {
@@ -75,7 +75,7 @@ app.get<{ id: string }>("/tasks/:id", (req, res) => {
 // DELETE /tasks/:id
 app.delete<{ id: string }>("/task/:id", (req, res) => {
   const matchingSignature = getDbItemById(parseInt(req.params.id));
-  deleteDbItemById(parseInt(req.params.id))
+  deleteDbItemById(parseInt(req.params.id));
   if (matchingSignature === "not found") {
     res.status(404).json(matchingSignature);
   } else {
@@ -98,9 +98,9 @@ app.patch<{ id: string }, {}, Partial<DbItem>>("/tasks/:id", (req, res) => {
 //get all completed tasks
 
 app.get("./tasks/completed", (req, res) => {
-  const allCompletedTasks = getAllCompleted()
-  res.status(200).json(allCompletedTasks)
-})
+  const allCompletedTasks = getAllCompleted();
+  res.status(200).json(allCompletedTasks);
+});
 
 //add item to completed
 app.post<{}, {}, DbItemWithId>("/tasks/completed", (req, res) => {
@@ -114,9 +114,9 @@ app.post<{}, {}, DbItemWithId>("/tasks/completed", (req, res) => {
 //clear completed tasks list
 app.delete("/tasks/completed/reset", (req, res) => {
   deleteAllCompleted();
-  const allTasks = getAllDbItems()
-  res.status(200).json(allTasks)
-})
+  const allTasks = getAllDbItems();
+  res.status(200).json(allTasks);
+});
 
 app.listen(PORT_NUMBER, () => {
   console.log(`Server is listening on port ${PORT_NUMBER}!`);

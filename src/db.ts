@@ -130,7 +130,7 @@ export const updateDbItemById = (
 export const deleteAllItems = () => {
   db.length = 0;
   return db;
-}
+};
 
 export const getAllCompleted = (): DbItemWithId[] => {
   return completedTasks;
@@ -142,9 +142,9 @@ export const addCompletedItem = (task: DbItemWithId) => {
   };
   db.push(newEntry);
   return newEntry;
-}
+};
 
 export const deleteAllCompleted = () => {
   completedTasks.length = 0;
   return completedTasks;
-}
+};
