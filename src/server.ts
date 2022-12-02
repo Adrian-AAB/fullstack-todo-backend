@@ -103,12 +103,12 @@ app.patch<{ id: string }, {}, Partial<DbItem>>("/tasks/:id", (req, res) => {
 //handle completed tasks after all other lines of code has run
 
 //add item to completed
-app.post<{}, {}, DbItemWithId>("/tasks/completed", (req, res) => {
+app.post<{}, {}, DbItemWithId>("/completed", (req, res) => {
   // to be rigorous, ought to handle non-conforming request bodies
   // ... but omitting this as a simplification
   const completedTask = req.body;
-  const createdSignature = addCompletedItem(completedTask);
-  res.status(201).json(createdSignature);
+  const completedTaskResult = addCompletedItem(completedTask);
+  res.status(201).json(completedTaskResult);
 });
 
 //clear completed tasks list
