@@ -4,6 +4,7 @@ export interface DbItem {
 
 export interface DbItemWithId extends DbItem {
   id: number;
+  status: boolean;
 }
 
 const db: DbItemWithId[] = [];
@@ -37,6 +38,7 @@ export const addDummyDbItems = (n: number): DbItemWithId[] => {
 export const addDbItem = (data: DbItem): DbItemWithId => {
   const newEntry: DbItemWithId = {
     id: ++idCounter,
+    status: false,
     ...data,
   };
   db.push(newEntry);
