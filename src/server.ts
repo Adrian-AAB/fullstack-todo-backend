@@ -46,6 +46,13 @@ app.get("/tasks", (req, res) => {
   res.status(200).json(allSignatures);
 });
 
+//get all completed tasks
+app.get("/completed", (req, res) => {
+  const allCompletedTasks = getAllCompleted();
+  res.status(200).json(allCompletedTasks);
+  console.log(allCompletedTasks)
+});
+
 // POST /tasks
 app.post<{}, {}, DbItem>("/tasks", (req, res) => {
   // to be rigorous, ought to handle non-conforming request bodies
@@ -95,13 +102,6 @@ app.patch<{ id: string }, {}, Partial<DbItem>>("/tasks/:id", (req, res) => {
 
 //handle completed tasks after all other lines of code has run
 
-//get all completed tasks
-
-app.get("/tasks/completed", (req, res) => {
-  const allCompletedTasks = getAllCompleted();
-  res.status(200).json(allCompletedTasks);
-});
-
 //add item to completed
 app.post<{}, {}, DbItemWithId>("/tasks/completed", (req, res) => {
   // to be rigorous, ought to handle non-conforming request bodies
@@ -112,7 +112,7 @@ app.post<{}, {}, DbItemWithId>("/tasks/completed", (req, res) => {
 });
 
 //clear completed tasks list
-app.delete("/tasks/completed/reset", (req, res) => {
+app.delete("/completed/reset", (req, res) => {
   deleteAllCompleted();
   const allTasks = getAllDbItems();
   res.status(200).json(allTasks);
