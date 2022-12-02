@@ -52,7 +52,7 @@ app.post<{}, {}, DbItem>("/tasks", (req, res) => {
 });
 
 // PATCH Database to empty /tasks/reset
-app.patch("/tasks/reset", (req, res) => {
+app.delete("/tasks/reset", (req, res) => {
   deleteAllItems();
   const allTasks = getAllDbItems()
   res.status(200).json(allTasks)
