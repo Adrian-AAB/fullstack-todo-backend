@@ -1,123 +1,152 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import {
-  addDummyDbItems,
-  deleteAllItems,
-  addDbItem,
-  getAllDbItems,
-  getDbItemById,
-  DbItem,
-  updateDbItemById,
-  deleteDbItemById,
-  addCompletedItem,
-  DbItemWithId,
-  deleteAllCompleted,
-  getAllCompleted,
-} from "./db";
 import filePath from "./filePath";
-
-// loading in some dummy items into the database
-// (comment out if desired, or change the number)
-//addDummyDbItems(20);
+const { Client } = require("pg");
 
 const app = express();
 
-/** Parses JSON data in a request automatically */
-app.use(express.json());
-/** To allow 'Cross-Origin Resource Sharing': https://en.wikipedia.org/wiki/Cross-origin_resource_sharing */
 app.use(cors());
+app.use(express.json());
 
-// read in contents of any environment variables in the .env file
 dotenv.config();
 
-// use the environment variable PORT, or 4000 as a fallback
 const PORT_NUMBER = process.env.PORT ?? 4000;
 
-// API info page
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+});
+
+async function connectServer() {
+  await client.connect();
+  console.log("client connected");
+}
+connectServer();
+
+//get API info page
 app.get("/", (req, res) => {
   const pathToFile = filePath("../public/index.html");
   res.sendFile(pathToFile);
 });
 
-// GET /tasks
-app.get("/tasks", (req, res) => {
-  const allSignatures = getAllDbItems();
-  res.status(200).json(allSignatures);
+//get all tasks
+app.get("/tasks", async (req, res) => {
+  try {
+    const tasks = await client.query("SELECT * FROM to_do_tasks");
+    res.status(201).json(tasks.rows);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message);
+    } else {
+      console.log("unexpected error", err);
+    }
+  }
 });
 
 //get all completed tasks
-app.get("/completed", (req, res) => {
-  const allCompletedTasks = getAllCompleted();
-  res.status(200).json(allCompletedTasks);
-  console.log(allCompletedTasks);
-});
 
-// POST /tasks
-app.post<{}, {}, DbItem>("/tasks", (req, res) => {
-  // to be rigorous, ought to handle non-conforming request bodies
-  // ... but omitting this as a simplification
-  const postData = req.body;
-  const createdSignature = addDbItem(postData);
-  res.status(201).json(createdSignature);
-});
-
-// PATCH Database to empty /tasks/reset
-app.delete("/tasks/reset", (req, res) => {
-  deleteAllItems();
-  const allTasks = getAllDbItems();
-  res.status(200).json(allTasks);
-});
-
-// GET /tasks/:id
-app.get<{ id: string }>("/tasks/:id", (req, res) => {
-  const matchingSignature = getDbItemById(parseInt(req.params.id));
-  if (matchingSignature === "not found") {
-    res.status(404).json(matchingSignature);
-  } else {
-    res.status(200).json(matchingSignature);
+app.get("/completed", async (req, res) => {
+  try {
+    const completedTasks = await client.query("SELECT * FROM completed_tasks");
+    res.status(201).json(completedTasks.rows);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message);
+    } else {
+      console.log("unexpected error", err);
+    }
   }
 });
 
-// DELETE /tasks/:id
-app.delete<{ id: string }>("/task/:id", (req, res) => {
-  const matchingSignature = getDbItemById(parseInt(req.params.id));
-  deleteDbItemById(parseInt(req.params.id));
-  if (matchingSignature === "not found") {
-    res.status(404).json(matchingSignature);
-  } else {
-    res.status(200).json(matchingSignature);
+//add a task
+interface TaskItem {
+  message: string;
+}
+app.post<{}, {}, TaskItem>("/tasks", async (req, res) => {
+  try {
+    console.log(req.body);
+    const createTask: TaskItem = req.body;
+    const createdTask = await client.query(
+      "INSERT INTO to_do_tasks (task) VALUES ($1)",
+      [createTask.message]
+    );
+    res.status(201).json(createTask);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message);
+    } else {
+      console.log("unexpected error", err);
+    }
   }
 });
 
-// PATCH /tasks/:id
-app.patch<{ id: string }, {}, Partial<DbItem>>("/tasks/:id", (req, res) => {
-  const matchingSignature = updateDbItemById(parseInt(req.params.id), req.body);
-  if (matchingSignature === "not found") {
-    res.status(404).json(matchingSignature);
-  } else {
-    res.status(200).json(matchingSignature);
+//delete all tasks
+app.delete("/tasks/reset", async (req, res) => {
+  try {
+    const deleteTasks = await client.query("TRUNCATE to_do_tasks");
+    res.status(201).json("Tasks tab was cleared");
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message);
+    } else {
+      console.log("unexpected error", err);
+    }
   }
 });
 
-//handle completed tasks after all other lines of code has run
-
-//add item to completed
-app.post<{}, {}, DbItemWithId>("/completed", (req, res) => {
-  // to be rigorous, ought to handle non-conforming request bodies
-  // ... but omitting this as a simplification
-  const completedTask = req.body;
-  const completedTaskResult = addCompletedItem(completedTask);
-  res.status(201).json(completedTaskResult);
+//Delete a specific task
+app.delete<{ id: string }>("/task/:id", async (req, res) => {
+  try {
+    const deleteTask = await client.query(
+      "DELETE FROM to_do_tasks WHERE task_id = $1",
+      [req.body.id]
+    );
+    res.status(201).json("Task was deleted");
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message);
+    } else {
+      console.log("unexpected error", err);
+    }
+  }
 });
 
-//clear completed tasks list
-app.delete("/completed/reset", (req, res) => {
-  deleteAllCompleted();
-  const allTasks = getAllDbItems();
-  res.status(200).json(allTasks);
+//add to completed
+interface TaskItemwithID {
+  id: number;
+  message: string;
+}
+app.post<{}, {}, TaskItemwithID>("/tasks", async (req, res) => {
+  try {
+    console.log(req.body);
+    const completeTask: TaskItemwithID = req.body;
+    const createdTask = await client.query(
+      "WITH deleted_rows AS (DELETE FROM to_do_tasks WHERE task_id = $1 RETURNING *) INSERT INTO completed_tasks SELECT * FROM delete_rows",
+      [completeTask.id]
+    );
+    res.status(201).json(completeTask);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message);
+    } else {
+      console.log("unexpected error", err);
+    }
+  }
+});
+
+//clear all completed tasks
+app.delete("/completed/reset", async (req, res) => {
+  try {
+    const deleteAllCompleted = await client.query("TRUNCATE completed_tasks");
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err);
+    } else {
+      console.log("unexpected error", err);
+    }
+  }
 });
 
 app.listen(PORT_NUMBER, () => {
-  console.log(`Server is listening on port ${PORT_NUMBER}!`);
+  console.log("Server is listening on port ", PORT_NUMBER);
 });
