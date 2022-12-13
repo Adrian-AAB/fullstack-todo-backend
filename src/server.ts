@@ -95,11 +95,12 @@ app.delete("/tasks/reset", async (req, res) => {
 });
 
 //Delete a specific task
-app.delete<{ id: string }>("/task/:id", async (req, res) => {
+app.delete<{ id: number }>("/task/:id", async (req, res) => {
   try {
+    console.log(req.params.id)
     const deleteTask = await client.query(
       "DELETE FROM to_do_tasks WHERE task_id = $1",
-      [req.body.id]
+      [req.params.id]
     );
     res.status(201).json("Task was deleted");
   } catch (err) {
@@ -114,11 +115,9 @@ app.delete<{ id: string }>("/task/:id", async (req, res) => {
 //add to completed
 interface TaskItemwithID {
   id: number;
-  message: string;
 }
-app.post<{}, {}, TaskItemwithID>("/tasks", async (req, res) => {
+app.post<{}, {}, TaskItemwithID>("/completed", async (req, res) => {
   try {
-    console.log(req.body);
     const completeTask: TaskItemwithID = req.body;
     const createdTask = await client.query(
       "WITH deleted_rows AS (DELETE FROM to_do_tasks WHERE task_id = $1 RETURNING *) INSERT INTO completed_tasks SELECT * FROM delete_rows",
