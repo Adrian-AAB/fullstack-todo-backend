@@ -97,7 +97,7 @@ app.delete("/tasks/reset", async (req, res) => {
 //Delete a specific task
 app.delete<{ id: number }>("/task/:id", async (req, res) => {
   try {
-    console.log(req.params.id)
+    console.log(req.params)
     const deleteTask = await client.query(
       "DELETE FROM to_do_tasks WHERE task_id = $1",
       [req.params.id]
