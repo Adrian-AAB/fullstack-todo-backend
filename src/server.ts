@@ -120,7 +120,7 @@ app.post<{}, {}, TaskItemwithID>("/completed", async (req, res) => {
   try {
     const completeTask: TaskItemwithID = req.body;
     const createdTask = await client.query(
-      "WITH deleted_rows AS (DELETE FROM to_do_tasks WHERE task_id = $1 RETURNING *) INSERT INTO completed_tasks SELECT * FROM delete_rows",
+      "WITH deleted_rows AS (DELETE FROM to_do_tasks WHERE task_id = $1 RETURNING *) INSERT INTO completed_tasks SELECT * FROM deleted_rows",
       [completeTask.id]
     );
     res.status(201).json(completeTask);
