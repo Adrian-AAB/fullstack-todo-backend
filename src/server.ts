@@ -97,7 +97,7 @@ app.delete("/tasks/reset", async (req, res) => {
 //Delete a specific task
 app.delete<{ id: number }>("/task/:id", async (req, res) => {
   try {
-    console.log(req.params)
+    console.log(req.params);
     const deleteTask = await client.query(
       "DELETE FROM to_do_tasks WHERE task_id = $1",
       [req.params.id]
@@ -137,6 +137,7 @@ app.post<{}, {}, TaskItemwithID>("/completed", async (req, res) => {
 app.delete("/completed/reset", async (req, res) => {
   try {
     const deleteAllCompleted = await client.query("TRUNCATE completed_tasks");
+    res.status(201).json({ message: "All Completed tasks were cleared" });
   } catch (err) {
     if (err instanceof Error) {
       console.error(err);
