@@ -32,8 +32,11 @@ app.get("/", (req, res) => {
 //get all tasks
 app.get("/tasks", async (req, res) => {
   try {
-    const tasks = await client.query("SELECT * FROM to_do_tasks");
+    const tasks = await client.query(
+      "SELECT task_id, task, complete, user_id FROM to_do_tasks"
+    );
     res.status(201).json(tasks.rows);
+    console.log(tasks.rows);
   } catch (err) {
     if (err instanceof Error) {
       console.error(err.message);
@@ -59,16 +62,16 @@ app.get("/completed", async (req, res) => {
 });
 
 //add a task
-interface TaskItem {
-  message: string;
+interface AddTask {
+  task: string;
+  user_id: string;
 }
-app.post<{}, {}, TaskItem>("/tasks", async (req, res) => {
+app.post<{}, {}, AddTask>("/tasks", async (req, res) => {
   try {
-    console.log(req.body);
-    const createTask: TaskItem = req.body;
+    const createTask: AddTask = req.body;
     const createdTask = await client.query(
-      "INSERT INTO to_do_tasks (task) VALUES ($1)",
-      [createTask.message]
+      "INSERT INTO to_do_tasks (task, user_id) VALUES ($1, $2)",
+      [createTask.task, createTask.user_id]
     );
     res.status(201).json(createTask);
   } catch (err) {
@@ -80,10 +83,18 @@ app.post<{}, {}, TaskItem>("/tasks", async (req, res) => {
   }
 });
 
-//delete all tasks
-app.delete("/tasks/reset", async (req, res) => {
+//delete all tasks from the user
+interface DeleteAllTasks {
+  user_id: string;
+}
+app.delete<{}, {}, DeleteAllTasks>("/tasks/reset", async (req, res) => {
   try {
-    const deleteTasks = await client.query("TRUNCATE to_do_tasks");
+    const deleteTasks: DeleteAllTasks = req.body;
+    const deletedTasks = await client.query(
+      "DELETE FROM to_do_tasks WHERE user_id = $1",
+      [deleteTasks.user_id]
+    );
+    console.log(deletedTasks);
     res.status(201).json("Tasks tab was cleared");
   } catch (err) {
     if (err instanceof Error) {
@@ -112,15 +123,15 @@ app.delete<{ id: number }>("/task/:id", async (req, res) => {
   }
 });
 
-//add to completed
-interface TaskItemwithID {
+//change complete value to true
+interface CompleteTask {
   id: number;
 }
-app.post<{}, {}, TaskItemwithID>("/completed", async (req, res) => {
+app.put<{}, {}, CompleteTask>("/completed", async (req, res) => {
   try {
-    const completeTask: TaskItemwithID = req.body;
-    const createdTask = await client.query(
-      "WITH deleted_rows AS (DELETE FROM to_do_tasks WHERE task_id = $1 RETURNING *) INSERT INTO completed_tasks SELECT * FROM deleted_rows",
+    const completeTask: CompleteTask = req.body;
+    const completedTask = await client.query(
+      "UPDATE to_do_tasks SET complete = true WHERE task_id = $1",
       [completeTask.id]
     );
     res.status(201).json(completeTask);
@@ -133,19 +144,24 @@ app.post<{}, {}, TaskItemwithID>("/completed", async (req, res) => {
   }
 });
 
-//clear all completed tasks
-app.delete("/completed/reset", async (req, res) => {
-  try {
-    const deleteAllCompleted = await client.query("TRUNCATE completed_tasks");
-    res.status(201).json({ message: "All Completed tasks were cleared" });
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(err);
-    } else {
-      console.log("unexpected error", err);
+app.delete<{}, {}, { user_id: string }>(
+  "/completed/reset",
+  async (req, res) => {
+    try {
+      const userID = req.body.user_id;
+      const deleteComplete = await client.query(
+        "DELETE FROM to_do_tasks WHERE complete = true AND user_id = $1",
+        [userID]
+      );
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.log("unexpected error", err);
+      }
     }
   }
-});
+);
 
 app.listen(PORT_NUMBER, () => {
   console.log("Server is listening on port ", PORT_NUMBER);
