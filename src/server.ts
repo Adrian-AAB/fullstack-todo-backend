@@ -30,10 +30,12 @@ app.get("/", (req, res) => {
 });
 
 //get all tasks
-app.get("/tasks", async (req, res) => {
+app.get<{}, {}, { user_id: string }>("/tasks", async (req, res) => {
   try {
+    const userID = req.body.user_id;
     const tasks = await client.query(
-      "SELECT task_id, task, complete, user_id FROM to_do_tasks"
+      "SELECT task_id, task, complete, user_id FROM to_do_tasks WHERE user_id = $1",
+      [userID]
     );
     res.status(201).json(tasks.rows);
     console.log(tasks.rows);
