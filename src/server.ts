@@ -30,38 +30,25 @@ app.get("/", (req, res) => {
 });
 
 //get all tasks
-app.get<{}, {}, { user_id: string }>("/tasks", async (req, res) => {
-  try {
-    const userID = req.body.user_id;
-    const tasks = await client.query(
-      "SELECT task_id, task, complete, user_id FROM to_do_tasks WHERE user_id = $1",
-      [userID]
-    );
-    res.status(201).json(tasks.rows);
-    console.log(tasks.rows);
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(err.message);
-    } else {
-      console.log("unexpected error", err);
+app.post<{}, {}, { data: { user_id: string | null } }>(
+  "/alltasks",
+  async (req, res) => {
+    try {
+      const userID = req.body.data.user_id;
+      const tasks = await client.query(
+        "SELECT task_id, task, complete, user_id FROM to_do_tasks WHERE user_id = $1",
+        [userID]
+      );
+      res.status(201).json(tasks.rows);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.log("unexpected error", err);
+      }
     }
   }
-});
-
-//get all completed tasks
-
-app.get("/completed", async (req, res) => {
-  try {
-    const completedTasks = await client.query("SELECT * FROM completed_tasks");
-    res.status(201).json(completedTasks.rows);
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(err.message);
-    } else {
-      console.log("unexpected error", err);
-    }
-  }
-});
+);
 
 //add a task
 interface AddTask {
@@ -110,7 +97,6 @@ app.delete<{}, {}, DeleteAllTasks>("/tasks/reset", async (req, res) => {
 //Delete a specific task
 app.delete<{ id: number }>("/task/:id", async (req, res) => {
   try {
-    console.log(req.params);
     const deleteTask = await client.query(
       "DELETE FROM to_do_tasks WHERE task_id = $1",
       [req.params.id]
