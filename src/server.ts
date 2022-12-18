@@ -141,6 +141,7 @@ app.delete<{}, {}, { user_id: string }>(
         "DELETE FROM to_do_tasks WHERE complete = true AND user_id = $1",
         [userID]
       );
+      res.status(201).json(deleteComplete.rows);
     } catch (err) {
       if (err instanceof Error) {
         console.error(err.message);
