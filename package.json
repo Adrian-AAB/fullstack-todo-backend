@@ -7,6 +7,7 @@
     "format:check": "prettier --check src",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
+    "test": "mocha --reporter spec",
     "start": "node dist/server.js",
     "start:dev": "ts-node-dev src/server.ts"
   },
