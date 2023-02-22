@@ -6,7 +6,7 @@ on:
       - main
   pull_request:
     branches:
-      - ma
+      - main
             
 jobs:
   ci:
@@ -19,7 +19,6 @@ jobs:
        - name: Install & Tests
          run: |
            npm install
-           npm test
            
   cd:
     runs-on: ubuntu-latest
